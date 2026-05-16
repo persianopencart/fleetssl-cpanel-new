@@ -1,7 +1,6 @@
 package common
 
 import (
-	"io/ioutil"
 	"os"
 
 	"encoding/json"
@@ -24,7 +23,7 @@ func MakeWhmClient(insecure bool) (whm.WhmApi, error) {
 }
 
 func ReadTotpSecret() string {
-	totpBytes, err := ioutil.ReadFile("/var/cpanel/authn/twofactor_auth/tfa_userdata.json")
+	totpBytes, err := os.ReadFile("/var/cpanel/authn/twofactor_auth/tfa_userdata.json")
 	if err != nil {
 		return ""
 	}

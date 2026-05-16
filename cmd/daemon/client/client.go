@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"net/url"
@@ -31,7 +31,7 @@ func GetConfig(config string) (string, error) {
 		return "", fmt.Errorf("Error checking cgi config: %v", resp)
 	}
 
-	contents, err := ioutil.ReadAll(resp.Body)
+	contents, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.WithError(err).WithField("Config", config).Error("Failed to get cgi check config")
 		return "", fmt.Errorf("Error reading cgi config response: %v", resp)

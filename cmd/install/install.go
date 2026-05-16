@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -194,7 +193,7 @@ func installChkservd() {
 	os.Remove("/etc/chkserv.d/letsencrypt")
 
 	// add line letsencrypt:1 to /etc/chkserv.d/chkservd.conf
-	input, err := ioutil.ReadFile("/etc/chkserv.d/chkservd.conf")
+	input, err := os.ReadFile("/etc/chkserv.d/chkservd.conf")
 	if err != nil {
 		warnPrint("Can't open chkservd.conf", err)
 		return
@@ -215,7 +214,7 @@ func installChkservd() {
 	// (ie, cpanel-ccs plugin installer)
 	// dumbly appends to the file
 	output := strings.Join(lines, "\n") + "\n"
-	err = ioutil.WriteFile("/etc/chkserv.d/chkservd.conf", []byte(output), 0644)
+	err = os.WriteFile("/etc/chkserv.d/chkservd.conf", []byte(output), 0644)
 	if err != nil {
 		warnPrint("Can't write to chkservd.conf", err)
 		return
@@ -273,7 +272,7 @@ func installConfig() {
 
 	var v daemon.Config
 	if common.FileExists(common.ConfigPath) {
-		bytes, err := ioutil.ReadFile(common.ConfigPath)
+		bytes, err := os.ReadFile(common.ConfigPath)
 		if err != nil {
 			warnPrint("Failed to read existing config file", err)
 		}
@@ -337,7 +336,7 @@ func installApachePreinclude() {
 	}
 
 	// read whole file
-	in, err := ioutil.ReadAll(fd)
+	in, err := io.ReadAll(fd)
 	if err != nil {
 		warnPrint("Error reading pre virtual host global include", err)
 		return
@@ -393,7 +392,7 @@ func updateRepoToCDN() {
 		if err != nil || fi.IsDir() {
 			return nil
 		}
-		buf, err := ioutil.ReadFile(path)
+		buf, err := os.ReadFile(path)
 		if err != nil {
 			return nil
 		}
@@ -401,7 +400,7 @@ func updateRepoToCDN() {
 		if strings.Contains(sBuf, "baseurl=https://letsencrypt-for-cpanel.com/repo") {
 			sBuf = strings.ReplaceAll(sBuf, "baseurl=https://letsencrypt-for-cpanel.com/repo", "baseurl=https://r.cpanel.fleetssl.com")
 		}
-		if err := ioutil.WriteFile(path, []byte(sBuf), fi.Mode().Perm()); err != nil {
+		if err := os.WriteFile(path, []byte(sBuf), fi.Mode().Perm()); err != nil {
 			warnPrint("Failed to update repo: ", path, err)
 		}
 		return nil

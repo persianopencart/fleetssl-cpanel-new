@@ -10,14 +10,13 @@ import (
 	"gopkg.in/gomail.v2"
 
 	"errors"
-	"io/ioutil"
 	"log"
 	"path/filepath"
 	"strings"
 
-	"github.com/go-ini/ini"
 	"github.com/kardianos/osext"
 	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"gopkg.in/ini.v1"
 )
 
 const (
@@ -123,7 +122,7 @@ func SendMail(to, subject, bodyText, bodyHtml string, args MailArgs, insecure bo
 }
 
 func readAll(f string) string {
-	b, err := ioutil.ReadFile(f)
+	b, err := os.ReadFile(f)
 	if err != nil {
 		return ""
 	}

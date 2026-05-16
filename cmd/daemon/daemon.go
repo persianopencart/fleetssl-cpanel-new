@@ -3,7 +3,6 @@ package daemon
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"sync"
@@ -192,7 +191,7 @@ func SelfTest() bool {
 					},
 				}
 				for _, v := range badTunings {
-					buf, err := ioutil.ReadFile(v.Path)
+					buf, err := os.ReadFile(v.Path)
 					if os.IsNotExist(err) {
 						continue
 					}

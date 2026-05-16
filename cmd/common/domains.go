@@ -2,11 +2,11 @@ package common
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -256,7 +256,7 @@ func checkUrl(url, expectedContents string) error {
 		return fmt.Errorf("Wanted response 200, got %d", resp.StatusCode)
 	}
 
-	buf, err := ioutil.ReadAll(resp.Body)
+	buf, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

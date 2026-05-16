@@ -1,7 +1,6 @@
 package daemon
 
 import (
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -174,7 +173,7 @@ func setFlagFile(flag string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(flag, []byte(cpanelFlagFileUniqueToken), 0644)
+	return os.WriteFile(flag, []byte(cpanelFlagFileUniqueToken), 0644)
 }
 
 func unsetFlagFile(flag string) error {
@@ -186,7 +185,7 @@ func unsetFlagFile(flag string) error {
 		return err // if we can't stat it and we expect to be able to, that is seriously bad news
 	}
 
-	buf, err := ioutil.ReadFile(flag)
+	buf, err := os.ReadFile(flag)
 	if err != nil {
 		return err
 	}

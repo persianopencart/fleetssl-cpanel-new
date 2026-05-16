@@ -3,7 +3,6 @@ package daemon
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -102,7 +101,7 @@ func workaroundDeletedCabundle() error {
 	}
 
 	// The file doesn't exist, we shall create it
-	if err := ioutil.WriteFile(cabundleFilename, []byte(cabundleContents), 0644); err != nil {
+	if err := os.WriteFile(cabundleFilename, []byte(cabundleContents), 0644); err != nil {
 		return fmt.Errorf("Failed to write cabundle: %v", err)
 	}
 
