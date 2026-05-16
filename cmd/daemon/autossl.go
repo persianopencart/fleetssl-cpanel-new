@@ -13,8 +13,8 @@ import (
 
 	"regexp"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 	"github.com/boltdb/bolt"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"

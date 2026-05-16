@@ -11,10 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/cgi/cpanelcgi"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/cgi/cpanelcgi"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 )
 
 type Api struct {

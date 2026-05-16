@@ -11,8 +11,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 
 	"gopkg.in/urfave/cli.v1"
 )

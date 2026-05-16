@@ -6,8 +6,8 @@ import (
 	"os/user"
 	"strings"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 	log "github.com/sirupsen/logrus"
 )

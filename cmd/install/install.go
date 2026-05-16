@@ -16,12 +16,12 @@ import (
 	"syscall"
 	"time"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
 
 	"github.com/fatih/color"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon"
 	"github.com/kardianos/service"
 )
 

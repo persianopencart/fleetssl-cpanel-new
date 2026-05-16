@@ -15,8 +15,8 @@ import (
 
 	"runtime"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 	"github.com/boltdb/bolt"
 	"github.com/fatih/color"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"

@@ -14,7 +14,7 @@ import (
 
 	"github.com/domainr/dnsr"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 
 	log "github.com/sirupsen/logrus"

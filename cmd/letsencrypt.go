@@ -10,17 +10,17 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/cgi"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/clapi"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/install"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/cgi"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/clapi"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/install"
 
 	"runtime"
 
 	"time"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/unprivileged"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/unprivileged"
 )
 
 func main() {

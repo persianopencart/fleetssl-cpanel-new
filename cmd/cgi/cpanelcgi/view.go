@@ -3,7 +3,7 @@ package cpanelcgi
 import (
 	"crypto/x509"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
 )
 
 func actionView(data ActionData) ErrorList {

@@ -1,7 +1,7 @@
 package clapi
 
 import (
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 	"gopkg.in/urfave/cli.v1"
 )
 

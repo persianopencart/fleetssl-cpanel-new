@@ -8,8 +8,8 @@ RUN apk update && \
 
 RUN gem install fpm
 
-RUN mkdir -p /go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/
+RUN mkdir -p /build
 
-WORKDIR /go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/
+WORKDIR /build
 
 CMD make clean rpm

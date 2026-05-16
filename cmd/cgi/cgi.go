@@ -10,8 +10,8 @@ import (
 
 	"os"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/cgi/cpanelcgi"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/cgi/whmcgi"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/cgi/cpanelcgi"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/cgi/whmcgi"
 )
 
 func Run() {
