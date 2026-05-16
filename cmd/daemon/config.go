@@ -3,7 +3,6 @@ package daemon
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"strings"
 	"sync"
 
@@ -70,7 +69,7 @@ var configMu sync.Mutex
 func ReadConfig() error {
 	var tmpConf Config
 
-	confBytes, err := ioutil.ReadFile(common.ConfigPath)
+	confBytes, err := os.ReadFile(common.ConfigPath)
 	if err != nil || len(confBytes) == 0 {
 		return errors.New("No config file present, using default values")
 	}
@@ -164,7 +163,7 @@ func writeConfigFile(v Config, filename string, perm os.FileMode) error {
 	if err != nil {
 		return fmt.Errorf("Unable to marshal config: %v", err)
 	}
-	err = ioutil.WriteFile(filename, confBytes, perm)
+	err = os.WriteFile(filename, confBytes, perm)
 	if err != nil {
 		return fmt.Errorf("Error writing config: %v", err)
 	}

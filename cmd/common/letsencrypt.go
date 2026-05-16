@@ -19,8 +19,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"io/ioutil"
-
 	"strings"
 
 	"crypto"
@@ -42,7 +40,7 @@ func DefaultCreateFile(path, dir, contents string) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("Unable to create directory (%s) in your web directory: %s", dir, err)
 	}
-	if err := ioutil.WriteFile(path, []byte(contents), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
 		return fmt.Errorf("Unable to create file (%s) in your web directory: %s", path, err)
 	}
 	return nil

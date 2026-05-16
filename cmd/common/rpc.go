@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -15,6 +14,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -28,11 +28,11 @@ func CreateRpcClient() (*grpc.ClientConn, context.Context, error) {
 			InsecureSkipVerify: os.Getenv("FLEETSSL_INSECURE_RPC") == "y",
 		})))
 	} else {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
 	hn, _ := os.Hostname()
-	conn, err := grpc.Dial(fmt.Sprintf("%s:5960", hn), opts...)
+	conn, err := grpc.NewClient(fmt.Sprintf("%s:5960", hn), opts...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -59,7 +59,7 @@ func GetTLSForRPC() (bool, *x509.Certificate, tls.Certificate) {
 	var crtBuf []byte
 
 	if _, err := os.Stat(MyCpanelPEMPath); err == nil {
-		bb, err := ioutil.ReadFile(MyCpanelPEMPath)
+		bb, err := os.ReadFile(MyCpanelPEMPath)
 		if err != nil {
 			log.WithError(err).Error("Failed to read mycpanel.pem")
 			return false, nil, tls.Certificate{}

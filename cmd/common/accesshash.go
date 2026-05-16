@@ -2,10 +2,9 @@ package common
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"time"
-
-	"io/ioutil"
 
 	"encoding/json"
 
@@ -68,7 +67,7 @@ func getOrCreateApiToken() (string, error) {
 }
 
 func readFile(path string) (string, error) {
-	ahBytes, err := ioutil.ReadFile(path)
+	ahBytes, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("Error reading api token file %s, %v", path, err)
 	}
@@ -111,7 +110,7 @@ func createApiToken() error {
 		return fmt.Errorf("Error creating new api token: %v", err)
 	}
 
-	if err := ioutil.WriteFile(pathApiToken, []byte(result.Data.Token), ConfigPermissions); err != nil {
+	if err := os.WriteFile(pathApiToken, []byte(result.Data.Token), ConfigPermissions); err != nil {
 		return fmt.Errorf("Error saving new api token: %v", err)
 	}
 

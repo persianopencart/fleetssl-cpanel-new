@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -21,12 +20,12 @@ func FileContentsSame(file1, file2 string) bool {
 		return false
 	}
 
-	b1, err := ioutil.ReadFile(file1)
+	b1, err := os.ReadFile(file1)
 	if err != nil {
 		return false
 	}
 
-	b2, err := ioutil.ReadFile(file2)
+	b2, err := os.ReadFile(file2)
 	if err != nil {
 		return false
 	}

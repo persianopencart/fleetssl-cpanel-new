@@ -1,12 +1,12 @@
 # eggsampler/acme
 
 [![GoDoc](https://godoc.org/github.com/eggsampler/acme?status.svg)](https://godoc.org/github.com/eggsampler/acme)
-[![Build Status](https://travis-ci.com/eggsampler/acme.svg?branch=master)](https://travis-ci.com/eggsampler/acme)
-[![Coverage Status](https://coveralls.io/repos/github/eggsampler/acme/badge.svg?branch=master)](https://coveralls.io/github/eggsampler/acme?branch=master)
+[![Build Status](https://github.com/eggsampler/acme/actions/workflows/go.yml/badge.svg)](https://github.com/eggsampler/acme/actions)
+[![Coverage Status](https://coveralls.io/repos/github/eggsampler/acme/badge.svg)](https://coveralls.io/github/eggsampler/acme)
 
 ## About
 
-`eggsampler/acme` is a Go client library implementation for [RFC8555](https://tools.ietf.org/html/rfc8555) (previously ACME v2). This library can be used with the [Let's Encrypt](https://letsencrypt.org/) Certificate Authority (CA), but also other ACME compliant CA's such as [ZeroSSL](https://zerossl.com/). 
+`eggsampler/acme` is a Go client library implementation for [RFC8555](https://tools.ietf.org/html/rfc8555) (previously ACME v2). This library can be used with the [Let's Encrypt](https://letsencrypt.org/) Certificate Authority (CA), but also other ACME compliant CA's such as [ZeroSSL](https://zerossl.com/), [Google Trust Services](https://pki.goog/) and others listed at https://acmeclients.com/certificate-authorities/. 
 
 The library is designed to provide a zero external dependency wrapper over exposed directory endpoints and provide objects in easy to use structures.
 
