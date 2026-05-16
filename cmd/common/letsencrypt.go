@@ -14,8 +14,8 @@ import (
 
 	"github.com/domainr/dnsr"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 
 	log "github.com/sirupsen/logrus"
 
@@ -378,6 +378,90 @@ func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 	}
 
 	return retCert, nil
+}
+
+// ChallengeMethodChain builds the ordered list of ACME challenge methods to
+// attempt for a single issuance. The preferred method (when valid) is placed
+// first and the remaining enabled methods follow in their configured order.
+// This is what implements the "DNS-01 first, HTTP-01 fallback" behaviour.
+//
+// http-01 cannot validate wildcard names, so it is dropped from the chain
+// whenever a wildcard identifier is requested.
+func ChallengeMethodChain(preferred string, enabled, domains []string) []string {
+	valid := map[string]bool{"dns-01": true, "http-01": true}
+
+	hasWildcard := false
+	for _, d := range domains {
+		if strings.HasPrefix(d, "*.") {
+			hasWildcard = true
+			break
+		}
+	}
+
+	chain := []string{}
+	seen := map[string]bool{}
+	add := func(m string) {
+		m = strings.TrimSpace(m)
+		if !valid[m] || seen[m] {
+			return
+		}
+		if hasWildcard && m == "http-01" {
+			return
+		}
+		seen[m] = true
+		chain = append(chain, m)
+	}
+
+	add(preferred)
+	for _, m := range enabled {
+		add(m)
+	}
+
+	// Always return at least one method to attempt.
+	if len(chain) == 0 {
+		if hasWildcard {
+			return []string{"dns-01"}
+		}
+		return []string{"http-01"}
+	}
+
+	return chain
+}
+
+// RequestCertWithFallback issues a certificate, attempting each validation
+// method in order until one succeeds. It powers automatic DNS-01 -> HTTP-01
+// fallback: when the first method fails (for example, the domain is not served
+// by the cPanel DNS cluster) issuance transparently retries with the next.
+func RequestCertWithFallback(certReq CertificateRequest, methods []string) (*NVDataDomainCerts, error) {
+	if len(methods) == 0 {
+		methods = []string{certReq.Method}
+	}
+
+	var attemptErrors []string
+	for i, method := range methods {
+		attempt := certReq
+		attempt.Method = method
+
+		cert, err := RequestCert(attempt)
+		if err == nil {
+			if i > 0 {
+				log.WithFields(log.Fields{
+					"method":  method,
+					"attempt": i + 1,
+				}).Info("Certificate issued using fallback validation method")
+			}
+			return cert, nil
+		}
+
+		log.WithError(err).WithFields(log.Fields{
+			"method":        method,
+			"attempt":       i + 1,
+			"total_methods": len(methods),
+		}).Warn("Validation method failed, trying next method if available")
+		attemptErrors = append(attemptErrors, fmt.Sprintf("%s: %v", method, err))
+	}
+
+	return nil, fmt.Errorf("all validation methods failed (%s)", strings.Join(attemptErrors, "; "))
 }
 
 func chooseBestChain(preferredIssuerCN string, chains map[string][]*x509.Certificate,

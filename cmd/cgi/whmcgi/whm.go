@@ -24,9 +24,9 @@ import (
 
 	"regexp"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 )
 
 var tasks sync.WaitGroup

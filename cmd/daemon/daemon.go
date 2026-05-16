@@ -15,12 +15,12 @@ import (
 
 	"runtime"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
 	"github.com/boltdb/bolt"
 	"github.com/fatih/color"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 )
 
 const (
@@ -57,8 +57,8 @@ func Run() {
 	}).Println("Daemon starting")
 	var err error
 
-	exitCh := make(chan error)    // errors from goroutines
-	sigCh := make(chan os.Signal) // catches signals from os to stop
+	exitCh := make(chan error)       // errors from goroutines
+	sigCh := make(chan os.Signal, 1) // catches signals from os to stop
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 
 	// Bring up web first because chkservd is looking for it

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, vet and test
+    runs-on: ubuntu-latest
+    env:
+      # Build strictly from the vendored dependencies, with no network
+      # access to module proxies. This keeps the plugin installable on
+      # restricted/offline networks and fails CI if a dependency is added
+      # without being vendored.
+      GOFLAGS: -mod=vendor
+      GOPROXY: off
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+
+      - name: Build
+        run: go build ./cmd/...
+
+      - name: Vet
+        run: go vet ./cmd/...
+
+      - name: Test
+        run: go test ./cmd/...

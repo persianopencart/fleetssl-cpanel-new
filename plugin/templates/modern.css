@@ -1,0 +1,356 @@
+/*
+ * FleetSSL cPanel - modern UI theme.
+ *
+ * Self-contained, local-only stylesheet (no CDN, no web fonts). Every rule is
+ * scoped to the .fleetssl-ui container so the styling never leaks into the
+ * surrounding cPanel / WHM chrome.
+ */
+
+.fleetssl-ui {
+  --fs-text:         #1f2933;
+  --fs-heading:      #0f172a;
+  --fs-muted:        #5b6b7a;
+  --fs-border:       #e3e8ef;
+  --fs-border-200:   #cbd5e1;
+  --fs-surface:      #ffffff;
+  --fs-surface-alt:  #f6f8fb;
+  --fs-primary:      #2563eb;
+  --fs-primary-dark: #1d4ed8;
+  --fs-danger:       #dc2626;
+  --fs-danger-bg:    #fef2f2;
+  --fs-info:         #2563eb;
+  --fs-info-bg:      #eef4ff;
+  --fs-success:      #15803d;
+  --fs-radius:       10px;
+  --fs-shadow:       0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .10);
+
+  color: var(--fs-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 6px 2px 36px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fleetssl-ui *,
+.fleetssl-ui *::before,
+.fleetssl-ui *::after { box-sizing: border-box; }
+
+/* Standalone pages (WHM) get a card surface; embedded cPanel pages stay flat. */
+.fleetssl-ui.fleetssl-page {
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(16, 24, 40, .08);
+  padding: 28px 32px 36px;
+  margin: 28px auto;
+}
+
+/* ---- Typography ------------------------------------------------------- */
+.fleetssl-ui h1,
+.fleetssl-ui h2,
+.fleetssl-ui h3,
+.fleetssl-ui h4,
+.fleetssl-ui .h1Title {
+  color: var(--fs-heading);
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 1.4em 0 .55em;
+}
+.fleetssl-ui h1,
+.fleetssl-ui .h1Title { font-size: 1.55rem; }
+.fleetssl-ui h2 { font-size: 1.28rem; }
+.fleetssl-ui h3 { font-size: 1.1rem; }
+.fleetssl-ui h4 { font-size: 1rem; }
+.fleetssl-ui > :first-child,
+.fleetssl-ui h1:first-child,
+.fleetssl-ui .h1Title:first-child { margin-top: .2em; }
+.fleetssl-ui p { margin: .6em 0; }
+.fleetssl-ui a { color: var(--fs-primary); text-decoration: none; }
+.fleetssl-ui a:hover { text-decoration: underline; }
+.fleetssl-ui strong { font-weight: 650; }
+.fleetssl-ui small { color: var(--fs-muted); font-size: .86em; }
+.fleetssl-ui hr {
+  border: 0;
+  border-top: 1px solid var(--fs-border);
+  margin: 1.5em 0;
+}
+.fleetssl-ui ul { padding-left: 1.3em; margin: .5em 0; }
+.fleetssl-ui li { margin: .2em 0; }
+.fleetssl-ui code {
+  background: var(--fs-surface-alt);
+  border: 1px solid var(--fs-border);
+  border-radius: 5px;
+  padding: .12em .42em;
+  font-size: .88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.fleetssl-ui pre {
+  background: var(--fs-surface-alt);
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: .82em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ---- Cards / wells ---------------------------------------------------- */
+.fleetssl-ui .twell {
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-shadow);
+  padding: 18px 20px;
+  margin: 0 0 20px;
+}
+.fleetssl-ui .twell > :first-child { margin-top: 0; }
+.fleetssl-ui .twell > :last-child { margin-bottom: 0; }
+
+/* ---- Buttons ---------------------------------------------------------- */
+.fleetssl-ui .btn,
+.fleetssl-ui input[type="submit"],
+.fleetssl-ui button {
+  display: inline-block;
+  font: inherit;
+  font-weight: 550;
+  line-height: 1.4;
+  padding: 9px 18px;
+  margin: 2px 4px 2px 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.fleetssl-ui .btn:hover,
+.fleetssl-ui input[type="submit"]:hover,
+.fleetssl-ui button:hover { text-decoration: none; }
+.fleetssl-ui .btn:focus-visible,
+.fleetssl-ui input[type="submit"]:focus-visible,
+.fleetssl-ui button:focus-visible,
+.fleetssl-ui select:focus-visible,
+.fleetssl-ui input:focus-visible {
+  outline: 2px solid var(--fs-primary);
+  outline-offset: 2px;
+}
+
+.fleetssl-ui .btn-primary,
+.fleetssl-ui input[type="submit"],
+.fleetssl-ui button[type="submit"] {
+  background: var(--fs-primary);
+  border-color: var(--fs-primary);
+  color: #fff;
+}
+.fleetssl-ui .btn-primary:hover,
+.fleetssl-ui input[type="submit"]:hover,
+.fleetssl-ui button[type="submit"]:hover {
+  background: var(--fs-primary-dark);
+  border-color: var(--fs-primary-dark);
+  color: #fff;
+}
+
+.fleetssl-ui .btn-default,
+.fleetssl-ui .btn:not(.btn-primary):not(.btn-link) {
+  background: var(--fs-surface);
+  border-color: var(--fs-border-200);
+  color: var(--fs-text);
+}
+.fleetssl-ui .btn-default:hover,
+.fleetssl-ui .btn:not(.btn-primary):not(.btn-link):hover {
+  background: var(--fs-surface-alt);
+  border-color: #94a3b8;
+}
+
+.fleetssl-ui .btn-link {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fs-primary);
+  padding: 6px 10px;
+}
+.fleetssl-ui .btn-link:hover {
+  background: var(--fs-info-bg);
+  text-decoration: none;
+}
+
+.fleetssl-ui [disabled],
+.fleetssl-ui .btn[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* ---- Forms ------------------------------------------------------------ */
+.fleetssl-ui label { font-weight: normal; }
+.fleetssl-ui input[type="text"],
+.fleetssl-ui input[type="email"],
+.fleetssl-ui input[type="password"],
+.fleetssl-ui input[type="number"],
+.fleetssl-ui input[type="url"],
+.fleetssl-ui input[type="search"],
+.fleetssl-ui select,
+.fleetssl-ui textarea {
+  font: inherit;
+  color: var(--fs-text);
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border-200);
+  border-radius: 8px;
+  padding: 8px 11px;
+  min-height: 38px;
+  max-width: 100%;
+}
+.fleetssl-ui textarea { min-height: 80px; }
+.fleetssl-ui select { cursor: pointer; }
+.fleetssl-ui input[type="text"]:focus,
+.fleetssl-ui input[type="email"]:focus,
+.fleetssl-ui input[type="password"]:focus,
+.fleetssl-ui input[type="number"]:focus,
+.fleetssl-ui input[type="url"]:focus,
+.fleetssl-ui input[type="search"]:focus,
+.fleetssl-ui select:focus,
+.fleetssl-ui textarea:focus {
+  border-color: var(--fs-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--fs-info-bg);
+}
+.fleetssl-ui input[type="checkbox"],
+.fleetssl-ui input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--fs-primary);
+  vertical-align: -3px;
+  margin: 0 6px 0 0;
+  cursor: pointer;
+}
+/* Inline checkbox / radio option labels */
+.fleetssl-ui .twell > label,
+.fleetssl-ui .radio label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 18px;
+}
+.fleetssl-ui td input[type="text"],
+.fleetssl-ui td input[type="email"] { width: 100%; }
+
+/* ---- Tables ----------------------------------------------------------- */
+.fleetssl-ui table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--fs-surface);
+  margin: 12px 0 20px;
+  font-size: .92rem;
+}
+.fleetssl-ui th {
+  text-align: left;
+  font-weight: 600;
+  font-size: .76rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--fs-muted);
+  background: var(--fs-surface-alt);
+  border-bottom: 1px solid var(--fs-border);
+  padding: 10px 12px;
+}
+.fleetssl-ui td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--fs-border);
+  vertical-align: top;
+}
+.fleetssl-ui tbody tr:last-child td { border-bottom: 0; }
+.fleetssl-ui .table-striped tbody tr:nth-child(even) { background: #fbfcfe; }
+.fleetssl-ui tbody tr:hover { background: var(--fs-surface-alt); }
+
+/* ---- Alerts / callouts ------------------------------------------------ */
+.fleetssl-ui .alert,
+.fleetssl-ui .callout {
+  border: 1px solid var(--fs-border);
+  border-left: 4px solid var(--fs-muted);
+  border-radius: var(--fs-radius);
+  background: var(--fs-surface-alt);
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+.fleetssl-ui .alert-danger {
+  border-left-color: var(--fs-danger);
+  background: var(--fs-danger-bg);
+  color: #7f1d1d;
+}
+.fleetssl-ui .alert-info,
+.fleetssl-ui .callout-info {
+  border-left-color: var(--fs-info);
+  background: var(--fs-info-bg);
+  color: #1e3a8a;
+}
+.fleetssl-ui .alert > :first-child,
+.fleetssl-ui .callout > :first-child,
+.fleetssl-ui .alert-message > :first-child { margin-top: 0; }
+.fleetssl-ui .alert > :last-child,
+.fleetssl-ui .callout > :last-child,
+.fleetssl-ui .alert-message > :last-child { margin-bottom: 0; }
+
+/* ---- Return / "Go Back" link ------------------------------------------ */
+.fleetssl-ui .return-link {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fs-border);
+}
+.fleetssl-ui .return-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 550;
+}
+
+/* ---- Tabs (WHM) ------------------------------------------------------- */
+.fleetssl-ui .nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  border-bottom: 2px solid var(--fs-border);
+}
+.fleetssl-ui .nav-tabs > li > a {
+  display: block;
+  padding: 10px 16px;
+  color: var(--fs-muted);
+  font-weight: 550;
+  border-radius: 8px 8px 0 0;
+}
+.fleetssl-ui .nav-tabs > li > a:hover {
+  color: var(--fs-primary);
+  background: var(--fs-info-bg);
+  text-decoration: none;
+}
+.fleetssl-ui .nav-tabs > li.active > a {
+  color: var(--fs-primary);
+  background: var(--fs-info-bg);
+  box-shadow: inset 0 -2px 0 var(--fs-primary);
+}
+.fleetssl-ui .tab-content > .tab-pane { display: none; }
+.fleetssl-ui .tab-content > .tab-pane.active { display: block; }
+
+/* ---- Icons (replaces the Bootstrap Glyphicons font, no web font) ------ */
+.fleetssl-ui .glyphicon {
+  font-style: normal;
+  font-family: inherit;
+  display: inline-block;
+  width: 1.1em;
+  text-align: center;
+  line-height: 1;
+}
+.fleetssl-ui .glyphicon-circle-arrow-left::before { content: "\2190"; }
+.fleetssl-ui .glyphicon-remove-sign::before       { content: "\26A0"; }
+.fleetssl-ui .glyphicon-trash::before             { content: "\2715"; }
+.fleetssl-ui .glyphicon-repeat::before            { content: "\21BB"; }
+.fleetssl-ui .glyphicon-list-alt::before          { content: "\25A4"; }
+.fleetssl-ui .glyphicon-plus::before              { content: "\002B"; }
+
+/* ---- Small screens ---------------------------------------------------- */
+@media (max-width: 720px) {
+  .fleetssl-ui.fleetssl-page { padding: 18px 16px 24px; margin: 12px; }
+  .fleetssl-ui table { font-size: .86rem; }
+  .fleetssl-ui th, .fleetssl-ui td { padding: 8px 9px; }
+}

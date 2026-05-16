@@ -2,14 +2,14 @@ FROM golang:1.20-alpine
 MAINTAINER FleetSSL cPanel <support@fleetssl.com>
 
 RUN apk update && \
-        apk add curl git mercurial breezy \
+        apk add curl \
         bash curl-dev ruby-dev build-base ruby ruby-io-console ruby-bundler \
         libffi libffi-dev gawk rpm gcc libc-dev cpio tar
 
 RUN gem install fpm
 
-RUN mkdir -p /go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/
+RUN mkdir -p /build
 
-WORKDIR /go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/
+WORKDIR /build
 
 CMD make clean rpm

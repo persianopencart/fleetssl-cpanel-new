@@ -24,10 +24,10 @@ import (
 	"bufio"
 	"io"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/daemon/client"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 )
 
 const (
@@ -655,27 +655,28 @@ func getRenewedCert(certData *common.NVDataDomainCerts, accountKeyPem, username,
 		domains = append(domains, certData.AltNames...)
 	}
 
-	method := certData.ChallengeMethod
-	if method == "" {
-		method = "http-01"
-	}
+	// The method last used for this certificate (if any) is preferred, with the
+	// server-configured methods providing automatic fallbacks. Brand new
+	// certificates (AutoSSL) have no stored method, so the configured default
+	// (DNS-01) is tried first.
+	methods := common.ChallengeMethodChain(certData.ChallengeMethod, config.ChallengeMethods, domains)
 
 	preferredIssuer := certData.PreferredIssuer
 	if preferredIssuer == "" {
 		preferredIssuer = config.PreferredIssuerCN
 	}
 
-	cert, err := common.RequestCert(common.CertificateRequest{
+	cert, err := common.RequestCertWithFallback(common.CertificateRequest{
 		AccountKeyPEM:        accountKeyPem,
 		Domains:              domains,
 		DocRoots:             []string{docroot},
-		Method:               method,
+		Method:               methods[0],
 		CpanelAPI:            cp,
 		DropPrivilegesToUser: username,
 		PKF:                  common.PrivateKeyFromPem(certData.DomainKey),
 		PreferredIssuer:      preferredIssuer,
 		DryRun:               dryRun,
-	})
+	}, methods)
 	if err != nil {
 		return nil, err
 	}

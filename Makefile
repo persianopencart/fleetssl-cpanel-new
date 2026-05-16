@@ -9,7 +9,7 @@ GOARCH?=amd64
 all: letsencrypt.live.cgi
 
 letsencrypt.live.cgi:
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) GO111MODULE=on go build -ldflags "-s -w -X bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common.AppVersion=$(VER)" -o letsencrypt.live.cgi cmd/letsencrypt.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) GO111MODULE=on go build -mod=vendor -ldflags "-s -w -X github.com/persianopencart/fleetssl-cpanel-new/cmd/common.AppVersion=$(VER)" -o letsencrypt.live.cgi cmd/letsencrypt.go
 
 translate:
 	cat cmd/cgi/*.go | gawk 'match($$0, /T[SEF]\(\"(.+?)\"\)/, m) { print "`" m[1] "`=" }' > plugin/vendor.en.ini_unsorted
@@ -74,8 +74,8 @@ docker-build-setup:
 	sudo docker build -t le-build .
 
 docker-build: clean clean-rpm
-	sudo docker run --rm -t -e "ARCH=i386" -e "GOARCH=386" -v $(CWD)/.gomodcache:/go/pkg/mod -v $(CWD):/go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel le-build
-	sudo docker run --rm -t -e "ARCH=amd64" -e "GOARCH=amd64" -v $(CWD)/.gomodcache:/go/pkg/mod -v $(CWD):/go/src/bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel le-build
+	sudo docker run --rm -t -e "ARCH=i386" -e "GOARCH=386" -v $(CWD):/build le-build
+	sudo docker run --rm -t -e "ARCH=amd64" -e "GOARCH=amd64" -v $(CWD):/build le-build
 
 clean-rpm:
 	rm -f *.rpm

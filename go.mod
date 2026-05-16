@@ -1,4 +1,4 @@
-module bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel
+module github.com/persianopencart/fleetssl-cpanel-new
 
 go 1.19
 

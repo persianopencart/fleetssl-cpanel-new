@@ -1,6 +1,6 @@
 package cpanelcgi
 
-import "bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common"
+import "github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
 
 func actionSettings(data ActionData) ErrorList {
 	if data.Req.Method == "POST" {

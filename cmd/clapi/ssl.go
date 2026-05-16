@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
 
-	"bitbucket.org/letsencrypt-cpanel/letsencrypt-cpanel/cmd/common/pb"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common/pb"
 )
 
 func SSL() cli.Command {
