@@ -385,6 +385,11 @@ func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 // first and the remaining enabled methods follow in their configured order.
 // This is what implements the "DNS-01 first, HTTP-01 fallback" behaviour.
 //
+// http-01 is always kept as the final fallback for non-wildcard names. It can
+// validate any name that resolves to this server even when the domain's DNS is
+// hosted elsewhere, so a DNS-01 failure (such as an NXDOMAIN on the
+// _acme-challenge record) is always retried over HTTP automatically.
+//
 // http-01 cannot validate wildcard names, so it is dropped from the chain
 // whenever a wildcard identifier is requested.
 func ChallengeMethodChain(preferred string, enabled, domains []string) []string {
@@ -416,6 +421,9 @@ func ChallengeMethodChain(preferred string, enabled, domains []string) []string 
 	for _, m := range enabled {
 		add(m)
 	}
+	// http-01 is the universal fallback: always attempt it last (for
+	// non-wildcard names) so issuance still succeeds when DNS-01 fails.
+	add("http-01")
 
 	// Always return at least one method to attempt.
 	if len(chain) == 0 {
