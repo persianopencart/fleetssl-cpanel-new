@@ -124,7 +124,7 @@ func actionIssue(data ActionData) ErrorList {
 				// issue certificate
 				issueResult, err := issueCertificate(
 					data.NVData, list.GatherNames(), primaryEntry,
-					data.Cpanel, method, prefIssuer, isDryRun,
+					data.Cpanel, method, challengeMethods, prefIssuer, isDryRun,
 					keyParams,
 				)
 				if err != nil {
@@ -207,7 +207,7 @@ func actionIssue(data ActionData) ErrorList {
 }
 
 func issueCertificate(account *common.NVDataAccount, altDomains []string, mainDomain common.DomainEntry,
-	cl cpanel.CpanelApi, method string, preferredIssuerCN string, dryRun bool, keyParams client.CryptoParams) (string, error) {
+	cl cpanel.CpanelApi, method string, enabledMethods []string, preferredIssuerCN string, dryRun bool, keyParams client.CryptoParams) (string, error) {
 
 	if !dryRun {
 		// Remove upto 1 expired/old cert before we do anything
@@ -223,17 +223,21 @@ func issueCertificate(account *common.NVDataAccount, altDomains []string, mainDo
 		domains = common.AppendIfNotExist(domains, alt)
 	}
 
+	// Build the ordered validation method chain: the selected method first,
+	// with the remaining server-enabled methods as automatic fallbacks.
+	methods := common.ChallengeMethodChain(method, enabledMethods, domains)
+
 	// get the cert
-	cert, err := common.RequestCert(common.CertificateRequest{
+	cert, err := common.RequestCertWithFallback(common.CertificateRequest{
 		AccountKeyPEM:   account.AccountKey,
 		Domains:         domains,
 		DocRoots:        []string{mainDomain.DocumentRoot},
-		Method:          method,
+		Method:          methods[0],
 		CpanelAPI:       cl,
 		PKF:             common.DefaultPrivateKeyFunc(keyParams),
 		PreferredIssuer: preferredIssuerCN,
 		DryRun:          dryRun,
-	})
+	}, methods)
 	if err != nil {
 		return TS("Failed to issue certificate"), err
 	}
@@ -380,7 +384,7 @@ func (h apiHandler) issueCertificate(w http.ResponseWriter, r *http.Request) {
 	// Ready to issue and install the certificate
 	msg, err := issueCertificate(
 		nvdata, req.DNSIdentifiers, mainDomain, h.cpanelAPI,
-		req.ChallengeMethod, req.PreferredIssuerCN, req.DryRun, keyParams,
+		req.ChallengeMethod, challengeMethods, req.PreferredIssuerCN, req.DryRun, keyParams,
 	)
 	if err != nil {
 		serveAPIError(w, http.StatusInternalServerError, "Failed to issue certificate", err.Error())

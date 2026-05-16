@@ -441,7 +441,7 @@ func (a Api) ConfigGetEntries(ctx context.Context, in *pb.ConfigGetEntriesReques
 			},
 			{
 				Name:        "Challenge Methods",
-				Description: "Which ACME challenge methods to allow to validate SSL certificates",
+				Description: "Ordered, comma-separated ACME validation methods. The first is the default; the rest are automatic fallbacks if it fails. Example: dns-01,http-01",
 				Type:        "string",
 				Key:         "challenge_methods",
 				Value:       strings.Join(config.ChallengeMethods, ","),
@@ -512,7 +512,7 @@ func (a Api) ConfigUpdateEntries(ctx context.Context, in *pb.ConfigUpdateEntries
 				b, _ := strconv.ParseBool(entry.Value) // discard error and set to false
 				newCfg.DisableRenewalMail = b
 			case "challenge_methods":
-				newCfg.ChallengeMethods = strings.Split(strings.TrimSpace(entry.Value), ",")
+				newCfg.ChallengeMethods = normalizeChallengeMethods(strings.Split(entry.Value, ","))
 			case "preferred_issuer_cn":
 				newCfg.PreferredIssuerCN = strings.TrimSpace(entry.Value)
 			case "autossl_skip_patterns":

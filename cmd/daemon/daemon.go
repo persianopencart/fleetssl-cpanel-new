@@ -58,7 +58,7 @@ func Run() {
 	var err error
 
 	exitCh := make(chan error)    // errors from goroutines
-	sigCh := make(chan os.Signal) // catches signals from os to stop
+	sigCh := make(chan os.Signal, 1) // catches signals from os to stop
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 
 	// Bring up web first because chkservd is looking for it

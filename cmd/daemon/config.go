@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"strings"
 	"sync"
 
 	"fmt"
@@ -100,8 +101,10 @@ func ReadConfig() error {
 		tmpConf.RenewalCountdownDays = 32
 	}
 
+	tmpConf.ChallengeMethods = normalizeChallengeMethods(tmpConf.ChallengeMethods)
 	if len(tmpConf.ChallengeMethods) == 0 {
-		tmpConf.ChallengeMethods = []string{"http-01", "dns-01"}
+		// DNS-01 is the default first attempt; HTTP-01 is the automatic fallback.
+		tmpConf.ChallengeMethods = []string{"dns-01", "http-01"}
 	}
 
 	if tmpConf.DNSChallengeDelay == nil {
@@ -121,10 +124,10 @@ func ReadConfig() error {
 		tmpConf.AutoSSLReplacementCutoff = 2
 	}
 
-	// If the Let's Encrypt ACME server is still offering the legacy cross-sign as an alternate
-	// chain, then use it. Once it's no longer offered, this won't do anything.
+	// Default to the modern ISRG Root X1 chain. The legacy DST Root CA X3
+	// cross-sign was retired by Let's Encrypt and is no longer offered.
 	if tmpConf.PreferredIssuerCN == "" {
-		tmpConf.PreferredIssuerCN = common.PreferredChainDST
+		tmpConf.PreferredIssuerCN = common.PreferredChainISRG
 	}
 
 	if tmpConf.CryptoKeyType == "" {
@@ -142,6 +145,18 @@ func ReadConfig() error {
 	configMu.Unlock()
 
 	return nil
+}
+
+// normalizeChallengeMethods trims whitespace and drops empty entries so that
+// values such as "dns-01, http-01" parse into a clean, ordered list.
+func normalizeChallengeMethods(in []string) []string {
+	out := make([]string, 0, len(in))
+	for _, m := range in {
+		if m = strings.TrimSpace(m); m != "" {
+			out = append(out, m)
+		}
+	}
+	return out
 }
 
 func writeConfigFile(v Config, filename string, perm os.FileMode) error {
