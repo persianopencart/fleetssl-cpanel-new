@@ -13,11 +13,11 @@ import (
 
 	"regexp"
 
-	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
-	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 	"github.com/boltdb/bolt"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon/client"
 )
 
 // gatherAccessibleDomains generates a list of domains that satisfy all of:

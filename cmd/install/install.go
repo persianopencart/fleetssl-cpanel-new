@@ -21,8 +21,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/letsencrypt-cpanel/cpanelgo/whm"
 
-	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon"
 	"github.com/kardianos/service"
+	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon"
 )
 
 var okPrint = color.New(color.Bold, color.FgGreen).PrintlnFunc()
