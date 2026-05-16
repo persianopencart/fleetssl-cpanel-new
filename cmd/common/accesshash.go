@@ -66,6 +66,19 @@ func getOrCreateApiToken() (string, error) {
 	return readFile(pathApiToken)
 }
 
+// InvalidateApiToken discards the stored WHM API token so that the next call
+// to ReadApiToken generates a fresh one. It is used to recover from a token
+// that WHM has begun rejecting — for example after the token was revoked, or
+// the server was restored from a backup so the saved token no longer matches
+// WHM's token store.
+func InvalidateApiToken() error {
+	apiTokenFailing = false
+	if err := os.Remove(pathApiToken); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
 func readFile(path string) (string, error) {
 	ahBytes, err := os.ReadFile(path)
 	if err != nil {
