@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.2...v1.3.0) (2026-05-16)
+
+
+### Bug Fixes
+
+* auto-recover from a rejected WHM API token ([e867cab](https://github.com/persianopencart/fleetssl-cpanel-new/commit/e867cab7679f979b27484d2ee09c55105cc1361a))
+
+
+### Features
+
+* modernize the UI and drop the bundled front-end libraries ([1e3db75](https://github.com/persianopencart/fleetssl-cpanel-new/commit/1e3db759365cecfb4ce00b472d4f1baa3eceb9ee))
+
 ## [1.2.2](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.1...v1.2.2) (2026-05-16)
 
 
