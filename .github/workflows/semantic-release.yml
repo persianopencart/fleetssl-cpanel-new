@@ -14,13 +14,28 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      GOFLAGS: -mod=vendor
+      GOPROXY: off
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm gawk dos2unix bc
+          sudo gem install --no-document fpm
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -31,6 +46,7 @@ jobs:
             semantic-release \
             @semantic-release/changelog \
             @semantic-release/commit-analyzer \
+            @semantic-release/exec \
             @semantic-release/release-notes-generator \
             @semantic-release/github \
             @semantic-release/git
