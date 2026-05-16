@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.3.0...v1.4.0) (2026-05-16)
+
+
+### Features
+
+* smart wildcard detection and resilient multi-domain issuance ([b86de4b](https://github.com/persianopencart/fleetssl-cpanel-new/commit/b86de4b18b24a8c1ce45904678cd9496d2e9563f))
+
 # [1.3.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.2...v1.3.0) (2026-05-16)
 
 
