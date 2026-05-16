@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.1.0...v1.2.0) (2026-05-16)
+
+
+### Features
+
+* publish installable RPM and DEB packages with each release ([1e32b49](https://github.com/persianopencart/fleetssl-cpanel-new/commit/1e32b4982ef0f9858c6310d3bff650d23b1a80f5))
+
 # [1.1.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.0.0...v1.1.0) (2026-05-16)
 
 
