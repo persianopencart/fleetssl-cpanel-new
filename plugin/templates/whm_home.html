@@ -2,18 +2,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FleetSSL cPanel (WHM)</title>
-<link rel="stylesheet" href="bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="datatables.min.css"/>
 <link rel="stylesheet" href="modern.css">
 <style>body { background: #eef2f6; margin: 0; }</style>
-<script src="jquery-1.12.4.min.js"></script>
-<script type="text/javascript" src="datatables.min.js"></script>
-<script src="bootstrap.min.js"></script>
-<script>
-    $(document).ready( function() {
-        installedTable = $('#installed_certs').DataTable();
-    } );
-</script>
+<script src="modern.js"></script>
 
 <div class="fleetssl-ui fleetssl-page">
 
@@ -25,8 +16,8 @@
     </div>
 
     <ul class="nav nav-tabs">
-        <li class="{{if not (.Params.Get "config")}}active{{end}}"><a data-toggle="tab" href="#sectionInstalled">Installed Certificates</a></li>
-        <li class="{{if .Params.Get "config"}}active{{end}}"><a data-toggle="tab" href="#sectionConfiguration">Configuration</a></li>
+        <li class="{{if not (.Params.Get "config")}}active{{end}}"><a href="#sectionInstalled">Installed Certificates</a></li>
+        <li class="{{if .Params.Get "config"}}active{{end}}"><a href="#sectionConfiguration">Configuration</a></li>
     </ul>
 
     <div class="tab-content">
@@ -51,6 +42,9 @@
                     <td>{{.Certificate.Expiry.String}}</td>
                     <td>{{.Docroot}}</td>
                 </tr>
+                {{end}}
+                {{if not .Vhosts}}
+                <tr><td colspan="4" class="empty-row">No Let's Encrypt certificates are installed on this server yet.</td></tr>
                 {{end}}
                 </tbody>
             </table>

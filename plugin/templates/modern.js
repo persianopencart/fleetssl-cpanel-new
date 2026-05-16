@@ -48,3 +48,30 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   applyMethod();
 });
+
+/*
+ * Tab switching for the WHM page. Clicking a .nav-tabs link reveals its
+ * matching .tab-pane. Replaces the old Bootstrap/jQuery tab plugin.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  var links = document.querySelectorAll(".nav-tabs a");
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener("click", function (e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute("href"));
+      if (!target) {
+        return;
+      }
+      var tabs = document.querySelectorAll(".nav-tabs li");
+      for (var j = 0; j < tabs.length; j++) {
+        tabs[j].classList.remove("active");
+      }
+      var panes = document.querySelectorAll(".tab-content > .tab-pane");
+      for (var j = 0; j < panes.length; j++) {
+        panes[j].classList.remove("active");
+      }
+      this.parentNode.classList.add("active");
+      target.classList.add("active");
+    });
+  }
+});
