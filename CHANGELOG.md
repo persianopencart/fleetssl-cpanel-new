@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.1...v1.2.2) (2026-05-16)
+
+
+### Bug Fixes
+
+* modernize dependencies and toolchain, clearing 31 known CVEs ([5557927](https://github.com/persianopencart/fleetssl-cpanel-new/commit/55579276033f14041b3bc444eebd07984c870b2f))
+
 ## [1.2.1](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.0...v1.2.1) (2026-05-16)
 
 
