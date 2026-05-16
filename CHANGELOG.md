@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.0.0...v1.1.0) (2026-05-16)
+
+
+### Features
+
+* automatic DNS-01 -> HTTP-01 validation fallback ([fe1de7e](https://github.com/persianopencart/fleetssl-cpanel-new/commit/fe1de7ed6a1c01f4b788b96ef5f8940e7fbe5b5c))
+* modern UI refresh with local-only assets ([61a05a7](https://github.com/persianopencart/fleetssl-cpanel-new/commit/61a05a772b27c1d26c764417d5230950854ff9a2))
+
 # 1.0.0 (2026-05-16)
 
 
