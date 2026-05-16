@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.2.0...v1.2.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* always fall back to HTTP-01 when DNS-01 validation fails ([9e91ecb](https://github.com/persianopencart/fleetssl-cpanel-new/commit/9e91ecb08a15cca6deffed2b31bae2aeb1acb5fe))
+
 # [1.2.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.1.0...v1.2.0) (2026-05-16)
 
 
