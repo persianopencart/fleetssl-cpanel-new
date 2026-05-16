@@ -58,6 +58,44 @@ type CertificateRequest struct {
 	DryRun               bool
 }
 
+// ValidationError reports that one or more requested names failed ACME
+// validation. It carries the names that failed, exactly as they were
+// requested (including any "*." wildcard prefix), so a caller can drop them
+// and retry issuance for the names that remain.
+type ValidationError struct {
+	Identifiers []string
+	Err         error
+}
+
+func (e *ValidationError) Error() string {
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return "validation failed for: " + strings.Join(e.Identifiers, ", ")
+}
+
+func (e *ValidationError) Unwrap() error { return e.Err }
+
+// validationFailedIdentifiers returns the names that failed validation if err
+// is, or wraps, a *ValidationError; otherwise it returns nil.
+func validationFailedIdentifiers(err error) []string {
+	var ve *ValidationError
+	if errors.As(err, &ve) {
+		return ve.Identifiers
+	}
+	return nil
+}
+
+// authzRequestedName returns the certificate name an authorization belongs to,
+// re-introducing the "*." prefix for wildcard authorizations so the value
+// matches the names passed in CertificateRequest.Domains.
+func authzRequestedName(auth acme.Authorization) string {
+	if auth.Wildcard {
+		return "*." + auth.Identifier.Value
+	}
+	return auth.Identifier.Value
+}
+
 func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 	// domains[0] == primary domain, anything else is an alias/parked domain
 
@@ -162,7 +200,8 @@ func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 			// no need to do this auth
 			continue
 		case "invalid":
-			return nil, fmt.Errorf("Auth %s is invalid!", currentAuth.Identifier.Value)
+			name := authzRequestedName(currentAuth)
+			return nil, &ValidationError{Identifiers: []string{name}, Err: fmt.Errorf("authorization for %s is invalid", name)}
 		}
 
 		currentChal, ok := currentAuth.ChallengeMap[certReq.Method]
@@ -176,7 +215,8 @@ func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 			// no need to do this challenge
 			continue
 		case "invalid":
-			return nil, fmt.Errorf("Challenge for auth %s is invalid!", currentAuth.Identifier.Value)
+			name := authzRequestedName(currentAuth)
+			return nil, &ValidationError{Identifiers: []string{name}, Err: fmt.Errorf("challenge for %s is invalid", name)}
 		}
 
 		chalList = append(chalList, chalEntry{currentAuth, currentChal})
@@ -307,9 +347,22 @@ func RequestCert(certReq CertificateRequest) (*NVDataDomainCerts, error) {
 	end:
 	}
 
+	// Attempt every challenge before bailing out so that one failing parked or
+	// alias domain does not mask the status of the others: the caller needs the
+	// full list of failed names to drop them and retry.
+	var failedNames []string
+	var challengeErrors []string
 	for _, chal := range chalList {
 		if _, err := cli.UpdateChallenge(account, chal.Chal); err != nil {
-			return nil, fmt.Errorf("Updating challenge for %s: %v (order URL: %v)", chal.Auth.Identifier.Value, err, order.URL)
+			name := authzRequestedName(chal.Auth)
+			failedNames = append(failedNames, name)
+			challengeErrors = append(challengeErrors, fmt.Sprintf("%s: %v", name, err))
+		}
+	}
+	if len(failedNames) > 0 {
+		return nil, &ValidationError{
+			Identifiers: failedNames,
+			Err:         fmt.Errorf("challenge validation failed (order %v): %s", order.URL, strings.Join(challengeErrors, "; ")),
 		}
 	}
 
@@ -444,6 +497,10 @@ func RequestCertWithFallback(certReq CertificateRequest, methods []string) (*NVD
 	}
 
 	var attemptErrors []string
+	var failedNames []string
+	seenFailedName := map[string]bool{}
+	sawValidationError := false
+
 	for i, method := range methods {
 		attempt := certReq
 		attempt.Method = method
@@ -465,9 +522,108 @@ func RequestCertWithFallback(certReq CertificateRequest, methods []string) (*NVD
 			"total_methods": len(methods),
 		}).Warn("Validation method failed, trying next method if available")
 		attemptErrors = append(attemptErrors, fmt.Sprintf("%s: %v", method, err))
+
+		for _, name := range validationFailedIdentifiers(err) {
+			sawValidationError = true
+			if !seenFailedName[name] {
+				seenFailedName[name] = true
+				failedNames = append(failedNames, name)
+			}
+		}
 	}
 
-	return nil, fmt.Errorf("all validation methods failed (%s)", strings.Join(attemptErrors, "; "))
+	combined := fmt.Errorf("all validation methods failed (%s)", strings.Join(attemptErrors, "; "))
+
+	// When every attempt failed validation for specific names, surface them so
+	// the caller can drop those names and retry issuance for the rest.
+	if sawValidationError {
+		return nil, &ValidationError{Identifiers: failedNames, Err: combined}
+	}
+	return nil, combined
+}
+
+// maxResilientAttempts caps how many drop-and-retry rounds RequestCertResilient
+// performs, as a safety net against pathological inputs.
+const maxResilientAttempts = 10
+
+// RequestCertResilient issues a certificate for certReq.Domains and, as far as
+// ACME allows, guarantees that the primary domain (Domains[0]) is covered.
+//
+// If additional names — typically parked or alias domains whose DNS points
+// elsewhere — fail validation, they are dropped and issuance is retried for the
+// names that remain. This stops one misconfigured alias from blocking the
+// certificate for the main domain. The primary domain is never dropped; if it
+// genuinely cannot be validated, the error is returned unchanged.
+//
+// It returns the issued certificate and the names that had to be excluded.
+// enabledMethods is the server-wide set of permitted validation methods and
+// certReq.Method is the preferred one; the method chain is rebuilt on every
+// attempt because dropping a wildcard name changes which methods are usable.
+func RequestCertResilient(certReq CertificateRequest, enabledMethods []string) (*NVDataDomainCerts, []string, error) {
+	domains := append([]string{}, certReq.Domains...)
+	if len(domains) == 0 {
+		return nil, nil, errors.New("no domains were requested")
+	}
+
+	var dropped []string
+	var lastErr error
+
+	for attempt := 0; attempt < maxResilientAttempts; attempt++ {
+		req := certReq
+		req.Domains = domains
+		methods := ChallengeMethodChain(certReq.Method, enabledMethods, domains)
+		req.Method = methods[0]
+
+		cert, err := RequestCertWithFallback(req, methods)
+		if err == nil {
+			return cert, dropped, nil
+		}
+		lastErr = err
+
+		remaining, justDropped := dropFailedNames(domains, validationFailedIdentifiers(err))
+		if len(justDropped) == 0 {
+			// Either this was not a per-name validation failure, or the only
+			// failing name was the primary domain: nothing safe left to drop.
+			break
+		}
+
+		dropped = append(dropped, justDropped...)
+		domains = remaining
+
+		log.WithFields(log.Fields{
+			"primary":   domains[0],
+			"dropped":   dropped,
+			"remaining": domains,
+		}).Warn("Retrying issuance without names that failed validation")
+	}
+
+	return nil, dropped, lastErr
+}
+
+// dropFailedNames removes every failed name from domains except the primary
+// domain (domains[0]), which is never dropped. It returns the reduced list and
+// the names that were removed, preserving the original order.
+func dropFailedNames(domains, failed []string) (remaining, dropped []string) {
+	if len(domains) == 0 {
+		return domains, nil
+	}
+
+	primary := domains[0]
+	failset := map[string]bool{}
+	for _, f := range failed {
+		if f != "" && f != primary {
+			failset[f] = true
+		}
+	}
+
+	for _, d := range domains {
+		if failset[d] {
+			dropped = append(dropped, d)
+		} else {
+			remaining = append(remaining, d)
+		}
+	}
+	return remaining, dropped
 }
 
 func chooseBestChain(preferredIssuerCN string, chains map[string][]*x509.Certificate,

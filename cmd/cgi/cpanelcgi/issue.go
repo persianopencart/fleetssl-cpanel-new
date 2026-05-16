@@ -190,6 +190,27 @@ func actionIssue(data ActionData) ErrorList {
 				proxyDomainsMap[d] = proxyLabels
 			}
 
+			// Pre-select a wildcard for the primary domain only when dns-01
+			// validation can actually succeed for it. Wildcard names have no
+			// http-01 fallback, so offering them by default for an externally
+			// hosted domain would only produce confusing issuance failures.
+			dnsMethodEnabled := false
+			for _, m := range challengeMethods {
+				if m == "dns-01" {
+					dnsMethodEnabled = true
+					break
+				}
+			}
+			wildcardViable := dnsMethodEnabled && common.IsDNS01Viable(data.Cpanel, domain)
+
+			defaultMethod := ""
+			if len(challengeMethods) > 0 {
+				defaultMethod = challengeMethods[0]
+			}
+			if wildcardViable {
+				defaultMethod = "dns-01"
+			}
+
 			serveTemplate(data, "issue.html", map[string]interface{}{
 				"DomainRoot": domain,
 				"Domains": map[string]common.DomainList{
@@ -199,6 +220,8 @@ func actionIssue(data ActionData) ErrorList {
 				"ProxyDomains":     proxyDomainsMap,
 				"ChallengeMethods": challengeMethods,
 				"DefaultKeyType":   cryptoParams.String(),
+				"WildcardViable":   wildcardViable,
+				"DefaultMethod":    defaultMethod,
 			})
 		}
 	}
@@ -223,27 +246,30 @@ func issueCertificate(account *common.NVDataAccount, altDomains []string, mainDo
 		domains = common.AppendIfNotExist(domains, alt)
 	}
 
-	// Build the ordered validation method chain: the selected method first,
-	// with the remaining server-enabled methods as automatic fallbacks.
-	methods := common.ChallengeMethodChain(method, enabledMethods, domains)
-
-	// get the cert
-	cert, err := common.RequestCertWithFallback(common.CertificateRequest{
+	// Issue the certificate. If extra names (typically parked or alias domains
+	// whose DNS points elsewhere) fail validation, they are dropped so the
+	// primary domain still ends up with a working certificate.
+	cert, dropped, err := common.RequestCertResilient(common.CertificateRequest{
 		AccountKeyPEM:   account.AccountKey,
 		Domains:         domains,
 		DocRoots:        []string{mainDomain.DocumentRoot},
-		Method:          methods[0],
+		Method:          method,
 		CpanelAPI:       cl,
 		PKF:             common.DefaultPrivateKeyFunc(keyParams),
 		PreferredIssuer: preferredIssuerCN,
 		DryRun:          dryRun,
-	}, methods)
+	}, enabledMethods)
 	if err != nil {
 		return TS("Failed to issue certificate"), err
 	}
 
+	droppedNote := ""
+	if len(dropped) > 0 {
+		droppedNote = " " + TF("Note: these names could not be validated and were left off the certificate: %s. Point them at this server, then re-issue to include them.", strings.Join(dropped, ", "))
+	}
+
 	if dryRun {
-		return TF("The dry run succeeded, a test certificate was issued and discarded: %s", cert.OrderUrl), nil
+		return TF("The dry run succeeded, a test certificate was issued and discarded: %s", cert.OrderUrl) + droppedNote, nil
 	}
 
 	if account.Certs == nil {
@@ -292,7 +318,7 @@ func issueCertificate(account *common.NVDataAccount, altDomains []string, mainDo
 		}
 	}
 
-	return install.Data.Message, nil
+	return install.Data.Message + droppedNote, nil
 }
 
 type issueCertificateRequest struct {
