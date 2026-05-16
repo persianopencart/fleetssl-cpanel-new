@@ -52,6 +52,20 @@ func TestChallengeMethodChain(t *testing.T) {
 			preferred: "tls-alpn-01",
 			enabled:   []string{"bogus", "dns-01"},
 			domains:   []string{"example.com"},
+			want:      []string{"dns-01", "http-01"},
+		},
+		{
+			name:      "dns-01 only config still falls back to http-01",
+			preferred: "dns-01",
+			enabled:   []string{"dns-01"},
+			domains:   []string{"example.com"},
+			want:      []string{"dns-01", "http-01"},
+		},
+		{
+			name:      "wildcard dns-01 only does not gain http-01",
+			preferred: "dns-01",
+			enabled:   []string{"dns-01"},
+			domains:   []string{"*.example.com"},
 			want:      []string{"dns-01"},
 		},
 		{
