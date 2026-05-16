@@ -1,17 +1,5 @@
 <p>{{TS `The Let's Encrypt&trade; service has rate limits for issuing large numbers of certificates and domains per certificate. <a href="https://letsencrypt.org/docs/rate-limits/" target="_blank">Click here</a> for more information.`}}</p>
 <p>{{TS `Please select any extra domains to include:`}}</p>
-<style>
-    .twell {
-        border: 1px solid #e3e3e3;
-        background-color: #f5f5f5;
-        padding: 9px;
-        border-radius: 3px;
-        margin-bottom: 20px;
-    }
-    label {
-        font-weight: normal;
-    }
-</style>
 <form method="post" onsubmit="return LetsEncrypt_DisableButtons()">
     {{$existing := .Existing}}
     {{$proxy := .ProxyDomains}}
@@ -86,8 +74,7 @@
         <p>{{TS `Please choose an SSL validation method (all are automatic):`}}</p>
         <div class="twell">
             <small>
-                <p>{{ TS `You will usually want to use the HTTP validation method.
-                If your domain's nameservers point to cPanel, then you have the option of using the DNS validation method instead.` }}</p>
+                <p>{{ TS `DNS validation (dns-01) is the default. If it does not succeed, the plugin automatically falls back to HTTP validation (http-01), so issuance keeps working even when a domain's nameservers are not managed by cPanel.` }}</p>
                 <p>{{ TS `If you wish to issue wildcards, you MUST use the DNS validation method.` }}</p>
             </small>
             {{ range $i, $method := $methods }}
