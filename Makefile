@@ -1,4 +1,4 @@
-.PHONY: all clean package deploy release translate clean-rpm docker-build docker-build-setup test
+.PHONY: all clean package deploy release translate clean-rpm docker-build docker-build-setup test rpm dist
 
 VER=`cat VERSION`
 ITERATION=`cat ITERATION`
@@ -37,6 +37,8 @@ rpm: letsencrypt.live.cgi translate
 	--before-remove fpm/uninstall.sh \
 	--prefix /opt/fleetssl-cpanel \
 	--rpm-os linux --url https://cpanel.fleetssl.com/ \
+	--license MIT --vendor persianopencart --maintainer persianopencart \
+	--description "Automatic free Let's Encrypt SSL certificates for cPanel & WHM" \
 	--depends bc
 
 	fpm -a $(ARCH) -s dir -t deb -n letsencrypt-cpanel -v $(VER) --iteration $(ITERATION) -C ./fpm/ \
@@ -44,9 +46,17 @@ rpm: letsencrypt.live.cgi translate
 	--before-remove fpm/uninstall.sh \
 	--prefix /opt/fleetssl-cpanel \
 	--url https://cpanel.fleetssl.com/ \
+	--license MIT --vendor persianopencart --maintainer persianopencart \
+	--description "Automatic free Let's Encrypt SSL certificates for cPanel & WHM" \
 	--depends bc --depends init-system-helpers
 
 	@rm -rf fpm
+
+# Build the packages and copy them to stable, unversioned filenames so they can
+# be published as GitHub release assets and fetched from a /releases/latest URL.
+dist: rpm
+	cp -f letsencrypt-cpanel-$(VER)-$(ITERATION).x86_64.rpm letsencrypt-cpanel.x86_64.rpm
+	cp -f letsencrypt-cpanel_$(VER)-$(ITERATION)_amd64.deb letsencrypt-cpanel.amd64.deb
 
 deploy:
 	rsync --progress -vz letsencrypt-cpanel-$(VER)-$(ITERATION).x86_64.rpm root@plugindev.fleetssl.com:/root/

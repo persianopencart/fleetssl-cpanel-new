@@ -12,10 +12,26 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "make dist VER=${nextRelease.version}"
+      }
+    ],
+    [
       "@semantic-release/github",
       {
         "successComment": false,
-        "failComment": false
+        "failComment": false,
+        "assets": [
+          {
+            "path": "letsencrypt-cpanel.x86_64.rpm",
+            "label": "letsencrypt-cpanel.x86_64.rpm (RHEL / AlmaLinux / Rocky / CloudLinux)"
+          },
+          {
+            "path": "letsencrypt-cpanel.amd64.deb",
+            "label": "letsencrypt-cpanel.amd64.deb (Ubuntu)"
+          }
+        ]
       }
     ],
     [
