@@ -18,6 +18,7 @@ import (
 	"github.com/persianopencart/fleetssl-cpanel-new/cmd/common"
 
 	"github.com/fatih/color"
+	"github.com/letsencrypt-cpanel/cpanelgo/whm"
 
 	"github.com/kardianos/service"
 	"github.com/persianopencart/fleetssl-cpanel-new/cmd/daemon"
@@ -292,13 +293,16 @@ func installConfig() {
 }
 
 func setCpanelTweaks() {
-	// Run whmapi1 directly as root. This needs no plugin WHM API token (and so
-	// no token ACL), and works even before the token has been provisioned.
-	out, err := exec.Command("/usr/local/cpanel/bin/whmapi1", "--output=json",
-		"set_tweaksetting", "key=allowcpsslinstall", "value=1").CombinedOutput()
+	s, err := common.ReadApiToken()
 	if err != nil {
-		warnPrint("Error setting tweak setting 'allowcpsslinstall'",
-			fmt.Errorf("%v: %s", err, strings.TrimSpace(string(out))))
+		failPrint(err)
+		return
+	}
+
+	whmcl := whm.NewWhmApiAccessHashTotp("127.0.0.1", "root", s, true, common.ReadTotpSecret())
+
+	if _, err := whmcl.SetTweakSetting("allowcpsslinstall", "", "1"); err != nil {
+		warnPrint("Error setting tweak setting 'allowcpsslinstall'", err)
 		return
 	}
 
