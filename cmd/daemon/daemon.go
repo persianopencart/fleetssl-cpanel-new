@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -28,7 +29,12 @@ const (
 )
 
 var db *bolt.DB
-var whmCl whm.WhmApi
+
+// whmCl is the daemon's shared WHM API client. It is an atomic pointer because
+// the daemon may start before a working client is available (a token problem
+// must not block startup) and retryWhmClient swaps in a working client later,
+// concurrently with the goroutines that read it.
+var whmCl atomic.Pointer[whm.WhmApi]
 
 var working = map[string]time.Time{}
 var muWorking sync.Mutex
@@ -36,17 +42,41 @@ var muWorking sync.Mutex
 var acmeRegistrationsLimit *ratelimit.Bucket
 
 func InitClients() error {
-	var err error
-	if err = ReadConfig(); err != nil {
+	if err := ReadConfig(); err != nil {
 		return fmt.Errorf("Error reading config: %v", err)
 	}
 
-	whmCl, err = common.MakeWhmClient(config.Insecure)
+	cl, err := common.MakeWhmClient(config.Insecure)
+	whmCl.Store(&cl)
 	if err != nil {
-		return fmt.Errorf("Error making WHM client: %v", err)
+		// A WHM API token problem must not stop the daemon from starting: the
+		// gRPC server — and therefore the WHM/cPanel interface — has to come
+		// up regardless. Work that needs WHM logs and skips until the token
+		// recovers, and retryWhmClient keeps trying in the background.
+		log.WithError(err).Error("WHM API client unavailable; daemon starting in a degraded state")
+		go retryWhmClient()
 	}
 
 	return nil
+}
+
+// retryWhmClient rebuilds the WHM API client in the background after a failed
+// initial attempt, so a transient token problem recovers without a daemon
+// restart. It returns once a working client has been stored.
+func retryWhmClient() {
+	for {
+		time.Sleep(time.Minute)
+
+		cl, err := common.MakeWhmClient(config.Insecure)
+		if err != nil {
+			log.WithError(err).Warn("WHM API client still unavailable; will retry")
+			continue
+		}
+
+		whmCl.Store(&cl)
+		log.Info("WHM API client recovered; daemon is no longer degraded")
+		return
+	}
 }
 
 func Run() {
@@ -59,6 +89,11 @@ func Run() {
 	exitCh := make(chan error)       // errors from goroutines
 	sigCh := make(chan os.Signal, 1) // catches signals from os to stop
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
+
+	// Seed whmCl so the loopback web server and RPC handlers can never
+	// dereference a nil pointer before InitClients runs; it is replaced with
+	// the real client moments later.
+	whmCl.Store(&whm.WhmApi{})
 
 	// Bring up web first because chkservd is looking for it
 	go listen(exitCh)

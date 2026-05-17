@@ -348,7 +348,7 @@ func (a Api) SSLReinstallCertificate(ctx context.Context, in *pb.SSLReinstallReq
 }
 
 func (a Api) SSLDoRenewals(ctx context.Context, in *pb.SSLDoRenewalsRequest) (*pb.SSLDoRenewalsResponse, error) {
-	renewed, err := processRenewalsForAccount(whmCl, in.User, in.Force, in.DryRun, in.VirtualHost)
+	renewed, err := processRenewalsForAccount(*whmCl.Load(), in.User, in.Force, in.DryRun, in.VirtualHost)
 	if err != nil {
 		return &pb.SSLDoRenewalsResponse{
 			Errors: a.makeError(err.Error()),

@@ -72,7 +72,7 @@ func processRenewals(exitCh chan<- error) { // blocking
 
 		log.Info("Processing renewals")
 
-		accts, err := whmCl.ListAccounts()
+		accts, err := whmCl.Load().ListAccounts()
 		if err != nil {
 			log.WithError(err).Error("Failed to fetch accounts, will try again in 1 minute")
 
@@ -92,7 +92,7 @@ func processRenewals(exitCh chan<- error) { // blocking
 				continue
 			}
 
-			_, err := processRenewalsForAccount(whmCl, acct.User, false, false, "")
+			_, err := processRenewalsForAccount(*whmCl.Load(), acct.User, false, false, "")
 			if err != nil {
 				log.WithError(err).WithField("User", acct.User).Error("Failed to process renewals")
 			}
