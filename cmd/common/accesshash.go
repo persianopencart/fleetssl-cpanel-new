@@ -105,22 +105,76 @@ func getTokenName() string {
 	return apiTokenNamePrefix + time.Now().Format("2006-01-02_15-04-05")
 }
 
-// createApiToken generates a new WHM API token, with the "all" ACL so it can
-// actually authenticate API calls, and stores it. Tokens previously created by
-// this plugin are revoked first: WHM caps how many API tokens may exist, and
-// without this cleanup the plugin leaves a stale token behind on every install,
-// reinstall and regeneration until token creation eventually fails with "No
-// cPanel API authentication token available".
+// defaultApiTokenAcls is the least-privilege set of WHM ACLs the plugin needs:
+// impersonating cPanel users (for renewals, dns-01 and certificate installs),
+// SSL inspection and installation, enumerating accounts, and restarting
+// services. It deliberately excludes account creation and termination,
+// password changes, DNS zone management, packages, reseller privileges and
+// root access — so a leaked token cannot be used to take over the server.
+var defaultApiTokenAcls = []string{
+	"cpanel-api",          // run cPanel/UAPI calls as each account
+	"ssl",                 // install and manage SSL, including service certificates
+	"ssl-info",            // read the installed SSL virtual hosts
+	"list-accts",          // enumerate accounts for renewal
+	"acct-summary",        // per-account details during renewal
+	"restart",             // restart cpsrvd/ftpd after a service-certificate install
+	"basic-whm-functions", // the WHM version check and other basic calls
+}
+
+// pathTokenAcls is an optional administrator override: a comma- or
+// newline-separated list of WHM ACLs to request for the API token. It is an
+// escape hatch in case a cPanel version maps an API call to a different ACL
+// than defaultApiTokenAcls expects, so the set can be corrected without
+// rebuilding the plugin. Lines beginning with "#" are treated as comments.
+const pathTokenAcls = "/etc/letsencrypt-cpanel-token-acls"
+
+// apiTokenAcls returns the WHM ACLs to request for a new API token: the
+// administrator override from pathTokenAcls when present and non-empty,
+// otherwise the built-in least-privilege default.
+func apiTokenAcls() []string {
+	raw, err := os.ReadFile(pathTokenAcls)
+	if err != nil {
+		return defaultApiTokenAcls
+	}
+	var acls []string
+	for _, line := range strings.Split(string(raw), "\n") {
+		if i := strings.IndexByte(line, '#'); i >= 0 {
+			line = line[:i]
+		}
+		for _, tok := range strings.Split(line, ",") {
+			if tok = strings.TrimSpace(tok); tok != "" {
+				acls = append(acls, tok)
+			}
+		}
+	}
+	if len(acls) == 0 {
+		return defaultApiTokenAcls
+	}
+	return acls
+}
+
+// createApiToken generates a new WHM API token, scoped to the ACLs from
+// apiTokenAcls so it carries only the privileges the plugin needs, and stores
+// it. Tokens previously created by this plugin are revoked first: WHM caps how
+// many API tokens may exist, and without this cleanup the plugin leaves a stale
+// token behind on every install, reinstall and regeneration until token
+// creation eventually fails with "No cPanel API authentication token available".
 func createApiToken() error {
 	revokeStaleApiTokens()
 
 	tn := getTokenName()
-	log.WithField("token_name", tn).Info("Creating new WHM API token")
+	acls := apiTokenAcls()
+	log.WithFields(log.Fields{"token_name": tn, "acls": acls}).Info("Creating new WHM API token")
 
-	// acl-1=all is required: a token created without any ACL has no
+	// The token must be created with ACLs: one created with none has no
 	// privileges, so every WHM API call would fail with "Access Denied" and
 	// the client would pointlessly regenerate the token on every request.
-	out, err := exec.Command(pathWhmapi1, "--output=json", "api_token_create", "token_name="+tn, "acl-1=all").Output()
+	args := []string{"--output=json", "api_token_create", "token_name=" + tn}
+	for i, acl := range acls {
+		args = append(args, fmt.Sprintf("acl-%d=%s", i+1, acl))
+	}
+
+	out, err := exec.Command(pathWhmapi1, args...).Output()
 	if err != nil {
 		return fmt.Errorf("Error calling new api token command: %v%s", err, exitErrorDetail(err))
 	}
