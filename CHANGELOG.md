@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.2...v1.4.3) (2026-05-17)
+
+
+### Bug Fixes
+
+* scope the WHM API token to least privilege instead of root ([975fa95](https://github.com/persianopencart/fleetssl-cpanel-new/commit/975fa95fac97fb8984280868998d635a2f6ea39c))
+
 ## [1.4.2](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.1...v1.4.2) (2026-05-17)
 
 
