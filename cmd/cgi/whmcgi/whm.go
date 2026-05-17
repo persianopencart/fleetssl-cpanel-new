@@ -61,7 +61,7 @@ func ServeWhmCgi(w http.ResponseWriter, r *http.Request) {
 
 	whmcl, err := common.MakeWhmClient(true)
 	if err != nil {
-		fmt.Fprint(w, "Error connecting to WHM", err)
+		fmt.Fprint(w, "Error connecting to WHM: ", err)
 		return
 	}
 
