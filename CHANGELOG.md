@@ -1,3 +1,10 @@
+## [1.4.5](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.4...v1.4.5) (2026-05-17)
+
+
+### Bug Fixes
+
+* keep the daemon running when the WHM API token is unavailable ([0845b1d](https://github.com/persianopencart/fleetssl-cpanel-new/commit/0845b1d7f7a43eac3635783fdc73e18ad818d791))
+
 ## [1.4.4](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.3...v1.4.4) (2026-05-17)
 
 
