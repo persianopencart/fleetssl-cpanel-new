@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.1...v1.4.2) (2026-05-17)
+
+
+### Bug Fixes
+
+* create WHM API tokens with privileges and stop them accumulating ([aa92ba6](https://github.com/persianopencart/fleetssl-cpanel-new/commit/aa92ba6c27eacf75c434a55bb0d80d2a52c8baee))
+
 ## [1.4.1](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.0...v1.4.1) (2026-05-17)
 
 
