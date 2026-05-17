@@ -6,6 +6,8 @@ import (
 
 	"github.com/domainr/dnsr"
 	"github.com/letsencrypt-cpanel/cpanelgo/cpanel"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // dnsViabilityTimeout bounds the public DNS lookup so the issuance page never
@@ -15,11 +17,15 @@ const dnsViabilityTimeout = 5 * time.Second
 // IsDNS01Viable reports whether dns-01 validation, and therefore wildcard
 // issuance, is likely to succeed for domain.
 //
-// It is true only when cPanel hosts an authoritative DNS zone for the domain
-// and the domain's public NS delegation points back at the nameservers cPanel
-// serves for that zone. When the registrar delegates DNS elsewhere (Cloudflare,
-// the registrar's own DNS and so on) the TXT record cPanel writes is never seen
-// by Let's Encrypt, so a wildcard cannot be validated.
+// It is true only when cPanel hosts an authoritative DNS zone for domain and
+// the public NS delegation for domain itself points back at the nameservers
+// cPanel serves for that zone. The public lookup is done on domain rather than
+// on the zone root, so a subdomain that is delegated away (a child zone cut) is
+// correctly treated as not viable even when its parent zone is on cPanel.
+//
+// When DNS is delegated elsewhere (Cloudflare, the registrar's own DNS and so
+// on) the TXT record cPanel writes is never seen by Let's Encrypt, so a
+// wildcard cannot be validated.
 //
 // It performs network I/O (cPanel API calls and an iterative DNS lookup) and is
 // intended for UI hints: any failure is reported as "not viable" so the caller
@@ -33,6 +39,8 @@ func IsDNS01Viable(cp cpanel.CpanelApi, domain string) bool {
 	// cPanel must host a DNS zone for the domain.
 	zones, err := cp.FetchZones()
 	if err != nil {
+		log.WithError(err).WithField("domain", domain).
+			Debug("dns-01 viability: could not list cPanel DNS zones")
 		return false
 	}
 	zoneRoot := zones.FindRootForName(domain)
@@ -40,10 +48,11 @@ func IsDNS01Viable(cp cpanel.CpanelApi, domain string) bool {
 		return false
 	}
 
-	// The nameservers cPanel publishes for that zone must match the domain's
-	// real, public delegation, otherwise cPanel is not authoritative for it.
+	// Collect the nameservers cPanel publishes for that zone.
 	zone, err := cp.FetchZone(zoneRoot, "NS")
 	if err != nil || len(zone.Data) == 0 {
+		log.WithError(err).WithField("zone", zoneRoot).
+			Debug("dns-01 viability: could not read the cPanel DNS zone")
 		return false
 	}
 	var localNS []string
@@ -53,14 +62,25 @@ func IsDNS01Viable(cp cpanel.CpanelApi, domain string) bool {
 		}
 	}
 
+	// Resolve the public NS delegation for the requested name. Looking up
+	// domain (not zoneRoot) means a subdomain delegated to an external provider
+	// is rejected even when its parent zone is hosted on cPanel.
 	var publicNS []string
-	for _, rr := range dnsr.NewWithTimeout(0, dnsViabilityTimeout).Resolve(zoneRoot, "NS") {
+	for _, rr := range dnsr.NewWithTimeout(0, dnsViabilityTimeout).Resolve(domain, "NS") {
 		if strings.EqualFold(rr.Type, "NS") {
 			publicNS = append(publicNS, rr.Value)
 		}
 	}
 
-	return nameserverSetsOverlap(localNS, publicNS)
+	viable := nameserverSetsOverlap(localNS, publicNS)
+	log.WithFields(log.Fields{
+		"domain":    domain,
+		"zone":      zoneRoot,
+		"local_ns":  localNS,
+		"public_ns": publicNS,
+		"viable":    viable,
+	}).Debug("dns-01 viability check")
+	return viable
 }
 
 // normalizeDNSName lowercases a DNS name and strips a trailing dot so that
