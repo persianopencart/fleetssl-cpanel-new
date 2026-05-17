@@ -301,7 +301,7 @@ func processAutoSSLForAccount(username string,
 		}
 	}
 
-	accountSummary, err := whmCl.AccountSummary(username)
+	accountSummary, err := whmCl.Load().AccountSummary(username)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to fetch account summary: %v", err)
 	}

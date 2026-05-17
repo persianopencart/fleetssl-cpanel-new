@@ -114,7 +114,7 @@ func checkHostCert(exitCh chan<- error) {
 
 		log.WithField("HostDomain", config.HostDomain).Info("Checking service certificates")
 
-		sslcomp, err := whmCl.FetchServiceSslComponents()
+		sslcomp, err := whmCl.Load().FetchServiceSslComponents()
 		if err != nil {
 			log.WithError(err).Error("Failed to fetch host service ssl components")
 			log.Info("Scheduling next check hostcert in 1 minute")
@@ -256,7 +256,7 @@ func checkHostCert(exitCh chan<- error) {
 			}
 
 			l.Info("Installed new service certificate, restarting cpsrvd")
-			_, err = whmCl.RestartService("cpsrvd")
+			_, err = whmCl.Load().RestartService("cpsrvd")
 			if err != nil {
 				err = exec.Command("/scripts/restartsrv_cpsrvd").Run()
 				if err != nil {
@@ -367,7 +367,7 @@ func installCertificates(services []string, cert, key, issuer string) error {
 		if strings.HasSuffix(s, "_apns") {
 			continue
 		}
-		_, err := whmCl.InstallServiceSslCertificate(s, cert, key, issuer)
+		_, err := whmCl.Load().InstallServiceSslCertificate(s, cert, key, issuer)
 		if err != nil {
 			return err
 		}
@@ -375,7 +375,7 @@ func installCertificates(services []string, cert, key, issuer string) error {
 		// 2022-03: apparently the ftpd does not get restarted automatically if its
 		// service certificate is updated. so we call it here.
 		if s == "ftp" {
-			if _, err := whmCl.RestartService("ftpd"); err != nil {
+			if _, err := whmCl.Load().RestartService("ftpd"); err != nil {
 				log.WithError(err).Error("Failed to restart ftpd after service certificate update")
 			}
 		}

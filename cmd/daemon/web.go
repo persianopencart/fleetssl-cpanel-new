@@ -85,7 +85,7 @@ func serve6to4Proxy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// We use this because it guarantees to resolve IPv4, in cPanel 68
-	ip, err := whmCl.ResolveDomainName(dom)
+	ip, err := whmCl.Load().ResolveDomainName(dom)
 	if err != nil || ip.Data.IP == "" {
 		http.Error(w, "Invalid domain", http.StatusInternalServerError)
 		return

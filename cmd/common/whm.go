@@ -14,10 +14,15 @@ import (
 // it as stale, the token is discarded, regenerated, and the client is rebuilt
 // once — so a revoked or carried-over token recovers automatically instead of
 // failing every request until the token file is removed by hand.
+//
+// If the token cannot be obtained at all, the returned client is still usable
+// — calls fail with an auth error rather than panicking — and the error is
+// returned alongside it, so a long-running caller can start in a degraded
+// state and recover later instead of failing outright.
 func MakeWhmClient(insecure bool) (whm.WhmApi, error) {
 	cl, err := newWhmClient(insecure)
 	if err != nil {
-		return whm.WhmApi{}, err
+		return cl, err
 	}
 
 	if _, err := cl.Version(); err != nil && IsWhmAuthError(err) {
@@ -33,17 +38,19 @@ func MakeWhmClient(insecure bool) (whm.WhmApi, error) {
 }
 
 func newWhmClient(insecure bool) (whm.WhmApi, error) {
-	s, err := ReadApiToken()
-	if err != nil {
-		return whm.WhmApi{}, err
-	}
-
 	hn, err := os.Hostname()
 	if err != nil {
 		return whm.WhmApi{}, err
 	}
 
-	return whm.NewWhmApiAccessHashTotp(hn, "root", s, insecure, ReadTotpSecret()), nil
+	// ReadApiToken can fail when WHM is temporarily unable to mint a token.
+	// Still return a fully constructed client: the WHM call layer tolerates an
+	// empty token (the request simply comes back as an auth error), so a
+	// long-running caller can degrade gracefully. The token error is returned
+	// so the caller still knows the client is not yet authenticated.
+	s, tokenErr := ReadApiToken()
+
+	return whm.NewWhmApiAccessHashTotp(hn, "root", s, insecure, ReadTotpSecret()), tokenErr
 }
 
 // IsWhmAuthError reports whether err is a WHM API authentication failure — a
