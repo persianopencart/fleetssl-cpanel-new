@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.0...v1.4.1) (2026-05-17)
+
+
+### Bug Fixes
+
+* base wildcard DNS viability on the requested name ([4ad9c4c](https://github.com/persianopencart/fleetssl-cpanel-new/commit/4ad9c4cb62eb011d8725b11b98fba40527a37ae6))
+
 # [1.4.0](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.3.0...v1.4.0) (2026-05-16)
 
 
