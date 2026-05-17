@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.3...v1.4.4) (2026-05-17)
+
+
+### Reverts
+
+* restore WHM API token to acl-1=all ([b1fbd17](https://github.com/persianopencart/fleetssl-cpanel-new/commit/b1fbd17b20618e281117b19e40e25ed1a6466d30))
+
 ## [1.4.3](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.2...v1.4.3) (2026-05-17)
 
 
