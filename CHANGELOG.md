@@ -1,3 +1,10 @@
+## [1.4.6](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.5...v1.4.6) (2026-05-24)
+
+
+### Bug Fixes
+
+* don't panic when saving an RSA default_key_type ([fcd1212](https://github.com/persianopencart/fleetssl-cpanel-new/commit/fcd1212b49575a24c9af744d72dc010fed755d10))
+
 ## [1.4.5](https://github.com/persianopencart/fleetssl-cpanel-new/compare/v1.4.4...v1.4.5) (2026-05-17)
 
 
