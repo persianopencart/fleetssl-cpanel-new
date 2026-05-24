@@ -529,7 +529,14 @@ func (a Api) ConfigUpdateEntries(ctx context.Context, in *pb.ConfigUpdateEntries
 				params, err := client.KeyTypeStringToParams(entry.Value)
 				if err == nil {
 					newCfg.CryptoKeyType = string(params.Type)
-					newCfg.CryptoEcdsaCurve = strings.ToLower(params.Curve.Params().Name)
+					// params.Curve is only populated for ECDSA. On RSA it is
+					// nil and reading .Params() on a nil interface used to
+					// panic the whole RPC handler, which silently rolled back
+					// every settings change because UpdateConfigExclusive
+					// never reached its file write.
+					if params.Curve != nil {
+						newCfg.CryptoEcdsaCurve = strings.ToLower(params.Curve.Params().Name)
+					}
 					newCfg.CryptoRsaKeySize = params.RsaKeySize
 				} else {
 					log.WithField("key", entry.Key).WithError(err).Warn("Invalid key type, ignoring")
